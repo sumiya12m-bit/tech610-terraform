@@ -1,17 +1,21 @@
 # use aws provider
 provider "aws" {
-  region = "eu-west-1"
-}
-
-# create security group
-resource "aws_security_group" "tech610_sumiya_tf_sg" {
-  name        = "tech610-sumiya-tf-allow-port-22-3000-80"
-  description = "Security group created by Terraform"
+  region = var.region
 }
 
 # fetch current public IP automatically
 data "http" "my_ip" {
   url = "https://checkip.amazonaws.com"
+}
+
+# create security group
+resource "aws_security_group" "tech610_sumiya_tf_sg" {
+  name        = var.sg_name
+  description = "Security group created by Terraform"
+
+  tags = {
+    Name = var.sg_name
+  }
 }
 
 # allow port 22 from my IP only
@@ -54,11 +58,11 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_outbound" {
 # name "tech610-sumiya-tf-first-vm"
 resource "aws_instance" "test_vm" {
   ami                     = var.test_vm_ami_id
-  instance_type           = "t3.micro"
+  instance_type           = var.instance_type
   key_name                = var.key_name
   vpc_security_group_ids = [aws_security_group.tech610_sumiya_tf_sg.id]
   tags = {
-    Name        = "tech610-sumiya-tf-first-vm"
-    Environment = "test"
+    Name        = var.instance_name
+    Environment = var.environment
   }
 }
