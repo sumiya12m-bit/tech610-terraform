@@ -9,13 +9,18 @@ resource "aws_security_group" "tech610_sumiya_tf_sg" {
   description = "Security group created by Terraform"
 }
 
+# fetch current public IP automatically
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com"
+}
+
 # allow port 22 from my IP only
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
   security_group_id = aws_security_group.tech610_sumiya_tf_sg.id
   from_port         = 22
   to_port           = 22
   ip_protocol       = "tcp"
-  cidr_ipv4         = "${var.my_ip}/32"
+  cidr_ipv4         = "${chomp(data.http.my_ip.response_body)}/32"
 }
 
 # allow port 3000 from all
